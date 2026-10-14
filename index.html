@@ -681,9 +681,9 @@ const HATS = { none: 'None', cap: 'Ball Cap', beanie: 'Beanie', straw: 'Straw Ha
 const T_ = (y, rows, xo = 0) => ({ y, rows, xo });
 const TPL = {
   head: {
-    d: T_(3, ['....SSSSSSSS....', '...SSSSSSSSSS...', '..SSSSSSSSSSSS..', '..SSSSSSSSSSSS..', '..SSSSSSSSSSSS..', '..SSSESSSSESSS..', '..SSSESSSSESSS..', '..SSBSSSSSSBSS..', '...SSSSSSSSSS...', '....ssssssss....']),
+    d: T_(3, ['....SSSSSSSS....', '...SSSSSSSSSS...', '..SSSSSSSSSSSS..', '..SSSSSSSSSSSS..', '..SSSSSSSSSSSS..', '..SSEeSSSSEeSS..', '..SSEESSSSEESS..', '..SBBSSSSSSBBS..', '...SSSSmmSSSS...', '....ssssssss....']),
     u: T_(3, ['....SSSSSSSS....', '...SSSSSSSSSS...', '..SSSSSSSSSSSS..', '..SSSSSSSSSSSS..', '..SSSSSSSSSSSS..', '..SSSSSSSSSSSS..', '..SSSSSSSSSSSS..', '..SSSSSSSSSSSS..', '...SSSSSSSSSS...', '....ssssssss....']),
-    s: T_(3, ['....SSSSSSSS....', '...SSSSSSSSSS...', '..SSSSSSSSSSSS..', '..SSSSSSSSSSSS..', '..SSSSSSSSSSSS..', '..SSESSSrSSSSS..', '.SSSESSSrSSSSS..', '..SBSSSSSSSSSS..', '...SSSSSSSSSS...', '....ssssssss....'])
+    s: T_(3, ['....SSSSSSSS....', '...SSSSSSSSSS...', '..SSSSSSSSSSSS..', '..SSSSSSSSSSSS..', '..SSSSSSSSSSSS..', '..SEeSSSrSSSSS..', '.SSEESSSrSSSSS..', '..SBBSSSSSSSSS..', '...mSSSSSSSSS...', '....ssssssss....'])
   },
   torso: {
     d: T_(13, ['....TTTNNTTt....', '....TTTTTTTt....', '....TTTTTTTt....', '....TTTTTTTt....', '....tttttttt....', '....PPPPPPPp....']),
@@ -754,6 +754,11 @@ const HATT = {
     u: T_(1, ['................', '.....CCCCCC.....', '....CCCCCCCC....', '....KKKKKKKK....', 'cCCCCCCCCCCCCCCc', '.cccccccccccccc.']),
     s: T_(1, ['................', '.....CCCCCC.....', '.....CwwCCC.....', '.....KKKKKK.....', '.CCCCCCCCCCCCCC.', '..cccccccccccc..']), cut: 5
   },
+  tophat: { // the mayor's, not sold anywhere
+    d: T_(0, ['....KKKKKKKK....', '....KCCCCCCK....', '....KCCCCCCK....', '....KwCCCCCK....', '....RRRRRRRR....', '.cccccccccccccc.']),
+    u: T_(0, ['....KKKKKKKK....', '....KCCCCCCK....', '....KCCCCCCK....', '....KCCCCCCK....', '....RRRRRRRR....', '.cccccccccccccc.']),
+    s: T_(0, ['....KKKKKKK.....', '....KCCCCCK.....', '....KCCCCCK.....', '....KwCCCCK.....', '....RRRRRRR.....', '..cccccccccccc..']), cut: 5
+  },
   flower: {
     d: T_(2, ['...........C.C..', '..........CCKCC.', '...........CCC..']),
     u: T_(2, ['..C.C...........', '.CCKCC..........', '..CCC...........']),
@@ -761,7 +766,7 @@ const HATT = {
   }
 };
 const ACC = {
-  glasses: { d: T_(8, ['....G.GGGG.G....', '....G.G..G.G....']), s: T_(8, ['...G.GGG........', '...G.G..........']) },
+  glasses: { d: T_(8, ['...G..GGGG..G...', '...G..G..G..G...', '....GG....GG....']), s: T_(8, ['..G..GGG........', '..G..G..........', '...GG...........']) },
   mustache: { d: T_(10, ['.....MMMMMM.....', '.....M....M.....']), s: T_(10, ['..MMM...........', '..M.............']) },
   beard: { d: T_(9, ['..M..........M..', '..MM........MM..', '...MMMMMMMMMM...', '....MMMMMMMM....', '.....MMMMMM.....']), s: T_(9, ['.......M........', '..M...MM........', '..MMMMMM........', '...MMMMM........', '....MMM.........']) }
 };
@@ -825,13 +830,14 @@ function outlinePix(p, skipKind = -1) {
 /* build one frame. dir: d/u/s, fr: 0 stand, 1 stepA, 2 stepB. parts: options */
 function buildBody(L, dir, fr, opt = {}) {
   const p = new Pix(20, 26), OX = 2, OY = 2, k = lookColors(L);
+  const hb = fr === 3 ? 1 : 0; if (fr === 3) fr = 0;
   const bob = fr ? -1 : 0;
   const mirLimbs = dir !== 's' && fr === 2;
   const fi = dir === 's' ? fr : (fr ? 1 : 0);
   const hs = HAIR[L.hair] || HAIR[0];
   const hairMap = ch => ch === 'H' ? k.H : ch === 'h' ? k.h : ch === 'w' ? k.hw : ch === 'r' ? '#e8505a' : null;
   // back hair
-  putT(p, hs['b' + dir], hairMap, OX, OY + bob, KIND.hair, false);
+  putT(p, hs['b' + dir], hairMap, OX, OY + bob + hb, KIND.hair, false);
   if (!opt.noLegs) putT(p, TPL.legs[dir === 's' ? 's' : 'd'][fi], ch => legMap(L, k, ch), OX, OY, KIND.legs, mirLimbs);
   // skirt flare
   const bs = L.top === 'dress' ? 'skirt' : L.top === 'overalls' ? 'pants' : L.bot;
@@ -869,18 +875,18 @@ function buildBody(L, dir, fr, opt = {}) {
   // arms (down / up) behind head
   if (dir !== 's') putT(p, TPL.arms.d[fi], ch => armMap(L, k, ch, dir), OX, OY + bob, KIND.arm, mirLimbs);
   // head
-  putT(p, TPL.head[dir], ch => ch === 'S' ? k.S : ch === 's' ? k.s : ch === 'r' ? k.s : ch === 'E' ? k.E : ch === 'B' ? mix(k.S, '#ff6f86', .35) : null, OX, OY + bob, KIND.head, false);
+  putT(p, TPL.head[dir], ch => ch === 'S' ? k.S : ch === 's' ? k.s : ch === 'r' ? k.s : ch === 'E' ? k.E : ch === 'e' ? '#ffffff' : ch === 'B' ? mix(k.S, '#ff6f86', .3) : ch === 'm' ? mix(k.s, '#9a3a48', .45) : null, OX, OY + bob + hb, KIND.head, false);
   // accessories under hair
   if (opt.acc) for (const a of opt.acc) {
     const t = ACC[a] && (ACC[a][dir] || null); if (!t) continue;
     const ac = a === 'glasses' ? '#6d5a7c' : k.h;
-    putT(p, t, ch => ch === 'G' ? ac : ch === 'M' ? (a === 'beard' ? k.H : k.h) : ch === 'E' ? k.E : ch === 'r' ? k.s : null, OX, OY + bob, KIND.acc, false);
+    putT(p, t, ch => ch === 'G' ? ac : ch === 'M' ? (a === 'beard' ? k.H : k.h) : ch === 'E' ? k.E : ch === 'r' ? k.s : null, OX, OY + bob + hb, KIND.acc, false);
   }
   // hair (trim under hats)
   const hat = L.hat && L.hat !== 'none' ? HATT[L.hat] : null;
   const hp = new Pix(20, 26);
-  putT(hp, hs[dir], hairMap, OX, OY + bob, KIND.hair, false);
-  const cut = hat ? hat.cut + OY + bob : -99;
+  putT(hp, hs[dir], hairMap, OX, OY + bob + hb, KIND.hair, false);
+  const cut = hat ? hat.cut + OY + bob + hb : -99;
   const strands = dir === 'u' ? [OX + 4, OX + 8, OX + 11] : dir === 's' ? [OX + 11] : [];
   for (let y = 0; y < 26; y++) for (let x = 0; x < 20; x++) {
     const c = hp.g(x, y); if (!c) continue;
@@ -889,11 +895,21 @@ function buildBody(L, dir, fr, opt = {}) {
     if (c === k.H) {
       if (p.kind(x, y + 1) === KIND.head && !hp.g(x, y + 1)) col = k.h; // shade the fringe
       else if (!hp.g(x + 1, y) && x > OX + 8) col = mix(k.H, k.h, .55);  // round off the shadow side
-      else if (strands.includes(x) && y >= OY + bob + 6 && hp.g(x, y + 1)) col = mix(k.H, k.h, .6);
+      else if (strands.includes(x) && y >= OY + bob + hb + 6 && hp.g(x, y + 1)) col = mix(k.H, k.h, .6);
     }
     p.s(x, y, col, KIND.hair);
   }
-  if (hat) putT(p, hat[dir], ch => ch === 'C' ? k.C : ch === 'c' ? k.c : ch === 'w' ? lt(k.C, .4) : ch === 'K' ? (L.hat === 'straw' ? '#d9473e' : L.hat === 'flower' ? '#ffe070' : L.hat === 'beanie' ? '#f4efe4' : k.c) : null, OX, OY + bob, KIND.hat, false);
+  // glossy hair: a soft shine arc following the crown, and a few darker strands through the fringe
+  if (!hat || hat.cut < 3) {
+    const tops = [];
+    for (let x = 0; x < 20; x++) { let y0 = -1; for (let y = 0; y < 26; y++) if (hp.g(x, y) && y >= cut) { y0 = y; break; } tops[x] = y0; }
+    const xs = tops.map((v, i) => v >= 0 ? i : -1).filter(v => v >= 0), xL = xs[0], xR = xs[xs.length - 1];
+    for (let x = xL + 1; x < xL + (xR - xL) * 0.62; x++) { const y = tops[x] + 2; if (tops[x] >= 0 && p.kind(x, y) === KIND.hair && p.g(x, y) !== k.h) p.s(x, y, mix(k.H, k.hw, 0.55), KIND.hair); }
+  }
+  if (dir === 'd') for (const sx of [OX + 5, OX + 9, OX + 12]) for (let y = 0; y < 26; y++) {
+    if (p.kind(sx, y) === KIND.hair && p.kind(sx, y + 1) === KIND.head && p.g(sx, y - 1) && p.kind(sx, y - 1) === KIND.hair) p.s(sx, y - 1, mix(k.H, k.h, .5), KIND.hair);
+  }
+  if (hat) putT(p, hat[dir], ch => ch === 'C' ? k.C : ch === 'c' ? k.c : ch === 'w' ? lt(k.C, .4) : ch === 'R' ? '#a83a3a' : ch === 'K' ? (L.hat === 'tophat' ? dk(k.C, .2) : L.hat === 'straw' ? '#d9473e' : L.hat === 'flower' ? '#ffe070' : L.hat === 'beanie' ? '#f4efe4' : k.c) : null, OX, OY + bob + hb, KIND.hat, false);
   // neck shadow: head/hair over torso
   for (let y = 0; y < 25; y++) for (let x = 0; x < 20; x++) {
     const kk = p.kind(x, y);
@@ -920,8 +936,21 @@ function finishPix(p, kid) {
     const blank = { a: new Array(p.w).fill(0), k: new Array(p.w).fill(0) }; rows.unshift(blank, { ...blank });
     rows.forEach((r, y) => { for (let x = 0; x < p.w; x++) { p.a[y * p.w + x] = r.a[x]; p.k[y * p.w + x] = r.k[x]; } });
   }
+  shadeRound(p);
   outlinePix(p);
   return p.canvas();
+}
+/* soft volume: the sunlit edge (top/left) warms up, the far edge (right/bottom) falls into cool shade */
+function shadeRound(p) {
+  const out = [];
+  for (let y = 0; y < p.h; y++) for (let x = 0; x < p.w; x++) {
+    const c = p.g(x, y); if (!c) continue;
+    const kk = p.kind(x, y); if (kk === KIND.bike) continue;
+    if (c === '#ffffff') continue;
+    if (!p.g(x + 1, y) || (!p.g(x, y + 1) && kk !== KIND.legs)) out.push([x, y, mix(c, '#3a2450', 0.2), kk]);
+    else if (!p.g(x - 1, y) || !p.g(x, y - 1)) out.push([x, y, mix(c, '#fff2cc', 0.2), kk]);
+  }
+  for (const [x, y, c, kk] of out) p.s(x, y, c, kk);
 }
 const _charCache = new Map();
 function charSprites(L, opt = {}) {
@@ -929,7 +958,7 @@ function charSprites(L, opt = {}) {
   let s = _charCache.get(key); if (s) return s;
   s = { walk: {}, bike: null };
   for (const d of ['d', 'u', 's']) {
-    const fr = [0, 1, 2].map(f => finishPix(buildBody(L, d, f, opt), opt.kid));
+    const fr = [0, 1, 2, 3].map(f => finishPix(buildBody(L, d, f, opt), opt.kid));
     if (d === 's') { s.walk.l = fr; s.walk.r = fr.map(flipCanvas); } else s.walk[d] = fr;
   }
   _charCache.set(key, s);
@@ -1156,6 +1185,7 @@ function portraitPix(L, opt = {}, mode = 0) { // mode: 0 normal, 1 talking, 2 bl
   if (hat === 'cap') { for (let y = 2; y < 10; y++) { const hwid = Math.round(10.5 * Math.sqrt(Math.max(0, 1 - ((y - 10) / 8.5) ** 2))); for (let x = cx - hwid; x < cx + hwid; x++) set(x, y, y < 5 && x < cx ? lt(C, .25) : C, PK.hat); } for (let x = 4; x < 25; x++) { set(x, 9, c2, PK.hat); set(x, 10, dk(c2, .2), PK.hat); } set(cx, 2, dk(C, .3), PK.hat); }
   if (hat === 'beanie') { for (let y = 2; y < 11; y++) { const hwid = Math.round(10.5 * Math.sqrt(Math.max(0, 1 - ((y - 11) / 9) ** 2))); for (let x = cx - hwid; x < cx + hwid; x++) set(x, y, y >= 8 ? c2 : (x % 2 && y < 8 ? C : lt(C, .1)), PK.hat); } for (let y = 0; y < 3; y++) for (let x = cx - 2; x < cx + 2; x++) set(x, y, '#f4efe4', PK.hat); }
   if (hat === 'straw') { for (let y = 1; y < 8; y++) for (let x = cx - 7; x < cx + 7; x++) set(x, y, y < 3 ? lt(C, .2) : C, PK.hat); for (let x = cx - 7; x < cx + 7; x++) { set(x, 6, '#d9473e', PK.hat); set(x, 7, '#d9473e', PK.hat); } for (let y = 8; y < 11; y++) { const hwid = y === 9 ? 16 : 14; for (let x = cx - hwid; x < cx + hwid; x++) set(x, y, y === 10 ? c2 : C, PK.hat); } }
+  if (hat === 'tophat') { for (let y = 0; y < 8; y++) for (let x = cx - 7; x < cx + 7; x++) set(x, y, y >= 5 ? '#a83a3a' : x < cx - 4 ? lt(C, .25) : C, PK.hat); for (let y = 8; y < 10; y++) for (let x = cx - 11; x < cx + 11; x++) set(x, y, y === 9 ? dk(c2, .2) : c2, PK.hat); }
   if (hat === 'flower') { const fc = C; for (const [x, y] of [[23, 5], [25, 5], [24, 4], [24, 6]]) set(x, y, fc, PK.hat); set(24, 5, '#ffe070', PK.hat); set(22, 4, fc, PK.hat); set(26, 6, fc, PK.hat); }
   outlinePix(p);
   return p;
@@ -1218,22 +1248,38 @@ function texel(t, X, Y, s) {
       const ck = (X + Y) & 1;
       let i = v < 0.3 ? 1 : v < 0.4 ? (ck ? 1 : 2) : v < 0.63 ? 2 : v < 0.71 ? (ck ? 3 : 2) : 3;
       if (s === 3 && h2(X, Y, 9) > 0.996) i = 4;
+      // blades: a sunlit tip over a shaded root, thicker in the lush clumps
+      if (s !== 3) {
+        const dens = 0.95 - vnoise(X / 17, Y / 17, 31) * 0.08;
+        if (h2(X, Y + 1, 32) > dens) return G[Math.min(4, i + 1 + (h2(X, Y, 33) > 0.6 ? 1 : 0))];
+        if (h2(X, Y, 32) > dens) return G[Math.max(0, i - 1)];
+        // tiny wildflower specks scattered through the meadow
+        if (s < 2 && t === TER.GRASS && h2(X, Y, 34) > 0.9965) return GPAL[s].fl[Math.floor(h2(X, Y, 35) * GPAL[s].fl.length)];
+      }
       return G[i];
     }
     case TER.PATH: {
       const p = PATHP[s]; const v = vnoise(X / 6, Y / 6, 4) + (h2(X, Y, 6) - 0.5) * 0.12; const ck = (X + Y) & 1;
       let i = v < 0.28 ? 1 : v < 0.38 ? (ck ? 1 : 2) : v < 0.68 ? 2 : v < 0.76 ? (ck ? 3 : 2) : 3;
       if (h2(X, Y, 5) > 0.986) i = 3; else if (h2(X, Y - 1, 5) > 0.986) i = 0;
-      return p[i];
+      return s === 3 ? snowDrift(p[i], X, Y) : p[i];
     }
     case TER.STONE: {
       const p = STONEP[s]; const row = Math.floor(Y / 6), off = (row & 1) * 4 + Math.floor(h2(row, 0, 7) * 3);
       const col = Math.floor((X + off) / 8), ix = (X + off) % 8, iy = Y % 6;
-      if (ix === 0 || iy === 0) return p[0];
+      if (ix === 0 || iy === 0) {
+        // moss creeping along the joints in the older parts of the square
+        if (s < 2 && vnoise(X / 11, Y / 11, 44) > 0.6 && h2(X, Y, 45) > 0.35) return h2(X, Y, 46) > 0.5 ? '#5e8a44' : '#4a7240';
+        return p[0];
+      }
+      // the odd cracked flagstone
+      const ck = h2(col, row, 47); if (ck > 0.955 && ((ix + iy * (ck > 0.977 ? 1 : -1) + 16) % 7 === 3) && ix > 1 && iy < 5) return mix(p[0], p[1], 0.4);
       const hv = h2(col, row, 8); let i = hv < 0.3 ? 1 : 2;
       if (iy === 1 || ix === 1) i = Math.min(3, i + 1);
       if (iy === 5) i = Math.max(1, i - 1);
-      return p[i];
+      // warm/cool variation stone to stone, like an old hand-laid square
+      const tint = h2(col, row, 9), c0 = tint < 0.22 ? mix(p[i], '#d8a878', 0.22) : tint > 0.84 ? mix(p[i], '#9c98b4', 0.2) : p[i];
+      return s === 3 ? snowDrift(c0, X, Y) : c0;
     }
     case TER.SAND: { const v = vnoise(X / 5, Y / 5, 11) + (h2(X, Y, 12) - 0.5) * 0.2; let i = v < 0.32 ? 1 : v < 0.7 ? 2 : 3; if (h2(X, Y, 13) > 0.985) i = 0; if (s === 3) return mix(SANDP[i], '#eef2fa', 0.6); return SANDP[i]; }
     case TER.FARM: { const p = FARMP[s]; const iy = Y % 8; let i = iy < 2 ? 3 : iy < 5 ? 2 : iy < 7 ? 1 : 0; if (h2(X, Y, 14) > 0.93) i = Math.max(0, i - 1); return p[i]; }
@@ -1268,6 +1314,11 @@ function texel(t, X, Y, s) {
     }
   }
   return '#ff00ff';
+}
+/* winter: soft drifts of snow lying on paths and paving */
+function snowDrift(c, X, Y) {
+  const v = vnoise(X / 24, Y / 24, 77) * 0.82 + vnoise(X / 7, Y / 7, 78) * 0.18;
+  return v > 0.6 ? (v > 0.625 ? '#f2f5fc' : '#d8e0f0') : c;
 }
 /* smooth analytic water bodies (lake, pond) carve organic shorelines at pixel level */
 function shapeAt(map, tx, ty) {
@@ -1407,7 +1458,7 @@ function renderGround(map, s) {
     if (s === 3 && r1 > 0.93) { P(bx + 6, by + 8, '#c49a62'); P(bx + 7, by + 7, '#c49a62'); P(bx + 7, by + 9, '#a07848'); }
     if (s === 2 && r1 > 0.8) { const x = bx + Math.floor(r3 * 13), y = by + Math.floor(r2 * 13); P(x, y, '#d0602a'); P(x + 1, y, '#e88a3a'); P(x, y + 1, '#b8482a'); }
   }
-  return c;
+  return paintGround(c, s, false);
 }
 function flowerAt(x, y, fc, s) {
   const stem = s === 2 ? '#7a6a2c' : '#3a8a3c';
@@ -1467,6 +1518,50 @@ function fallFrames(s) {
   return _fall[s] = fr;
 }
 
+// ---- 05b_paint.js ----
+/* =====================================================================
+   PAINT PASS: gives generated art the title painting's soft, warm finish.
+   Light comes from the upper left; highlights lean golden, shadows lean
+   violet (never grey); a whisper of grain breaks up flat fills.
+   ===================================================================== */
+function paintPixel(d, k, f, o) {
+  let r = d[k] * f, g = d[k + 1] * f, b = d[k + 2] * f;
+  const L = (r * 0.3 + g * 0.59 + b * 0.11) / 255;
+  if (L > 0.6) { const t = Math.min(1, (L - 0.6) / 0.4) * 0.17 * (o.warm ?? 1); r += (255 - r) * t * 0.55; g += (232 - g) * t * 0.3; b -= b * t * 0.22; }
+  else if (L < 0.42) { const t = (0.42 - L) / 0.42 * (o.cool ?? 0.24); r = r * (1 - t) + 60 * t; g = g * (1 - t) + 38 * t; b = b * (1 - t) + 88 * t; }
+  const m = (r + g + b) / 3, sat = o.sat ?? 1.1; r = m + (r - m) * sat; g = m + (g - m) * sat; b = m + (b - m) * sat;
+  d[k] = r; d[k + 1] = g; d[k + 2] = b;
+}
+/* sprites: light falls from the top-left, the base sits in soft shade */
+function paintSprite(c, o = {}) {
+  const w = c.width, h = c.height; if (!w || !h) return c;
+  const x = c.getContext('2d'), id = x.getImageData(0, 0, w, h), d = id.data;
+  const top = o.top ?? 0.11, side = o.side ?? 0.06, grain = o.grain ?? 3.5, y0 = o.y0 ?? 0, yh = o.yh ?? h;
+  for (let y = 0; y < h; y++) {
+    const gy = clamp((y - y0) / yh, 0, 1), base = y > h - (o.ao ?? 5) ? (y - (h - (o.ao ?? 5))) / (o.ao ?? 5) * (o.aoAmt ?? 0.12) : 0;
+    for (let xx = 0; xx < w; xx++) {
+      const k = (y * w + xx) * 4; if (d[k + 3] < 8) continue;
+      if (d[k] + d[k + 1] + d[k + 2] < 70) continue;            // keep outlines crisp
+      const f = 1 + top * (0.5 - gy) * 2 + side * (0.5 - xx / w) * 2 - base + (h2(xx + (o.sx || 0), y + (o.sy || 0), 991) - 0.5) * grain / 50;
+      paintPixel(d, k, f, o);
+    }
+  }
+  x.putImageData(id, 0, 0); return c;
+}
+/* ground: broad soft pools of light and shade, as if from drifting clouds and canopy */
+function paintGround(c, s, inside) {
+  const w = c.width, h = c.height, x = c.getContext('2d'), id = x.getImageData(0, 0, w, h), d = id.data;
+  const o = inside ? { sat: 1.06, cool: 0.16, warm: 0.8 } : { sat: s === 3 ? 1.02 : 1.12, cool: 0.22, warm: 1 };
+  for (let y = 0; y < h; y++) for (let xx = 0; xx < w; xx++) {
+    const k = (y * w + xx) * 4; if (d[k + 3] < 8) continue;
+    const f = inside ? 1 + (h2(xx, y, 993) - 0.5) * 0.05
+      : 1 + (vnoise(xx / 74, y / 74, 5) - 0.5) * 0.17 + (vnoise(xx / 21, y / 21, 6) - 0.5) * 0.07 + (h2(xx, y, 992) - 0.5) * 0.05;
+    paintPixel(d, k, f, o);
+  }
+  x.putImageData(id, 0, 0); return c;
+}
+const PAINT_KEYS = /^(tree_|bush_|bigtree_|prop_|crop_|tower_|fountain_|fence_|bus|f_)/;
+
 // ---- 06_props.js ----
 /* ---------- props: trees, bushes, street furniture ---------- */
 const LEAF = {
@@ -1486,9 +1581,11 @@ function shadeBlob(p, puffs, tones, ox = 0, oy = 0, seed = 1) {
     for (let i = puffs.length - 1; i >= 0; i--) { const q = puffs[i]; if ((x - q.x) ** 2 + (y - q.y) ** 2 <= q.r * q.r) { front = i; break; } }
     if (front < 0) continue;
     const q = puffs[front], nx = (x - q.x) / q.r, ny = (y - q.y) / q.r, nz = Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny));
-    let b = nz * 0.55 - (nx * L[0] + ny * L[1]) * 0.75 - 0.12;
-    b += (vnoise((x + ox) / 2.6, (y + oy) / 2.6, seed) - 0.5) * 0.5;
-    let ti = b > 0.62 ? 4 : b > 0.3 ? 3 : b > -0.06 ? 2 : b > -0.42 ? 1 : 0;
+    let b = nz * 0.5 - (nx * L[0] + ny * L[1]) * 0.95 - 0.1;
+    // leaf clumps: small lumps catch the light on their upper side and shade below
+    const lc = vnoise((x + ox) / 1.9, (y + oy) / 1.9, seed + 7), lcu = vnoise((x + ox) / 1.9, (y + oy - 1) / 1.9, seed + 7);
+    b += (vnoise((x + ox) / 2.6, (y + oy) / 2.6, seed) - 0.5) * 0.35 + (lc - lcu) * 1.1;
+    let ti = b > 0.66 ? 4 : b > 0.3 ? 3 : b > -0.08 ? 2 : b > -0.45 ? 1 : 0;
     // separate overlapping clusters
     const dist = Math.hypot(x - q.x, y - q.y);
     if (dist > q.r - 1.3) { for (let j = 0; j < front; j++) { const r = puffs[j]; if ((x - r.x) ** 2 + (y - r.y) ** 2 <= r.r * r.r && y > q.y - q.r * 0.3) { ti = Math.max(0, Math.min(ti, 1) - (y > q.y ? 1 : 0)); break; } } }
@@ -1507,7 +1604,11 @@ function trunkPix(p, cx, y0, y1, wdt, bark = ['#3e2a24', '#5c3e2e', '#7a553a', '
   }
 }
 const _spr = {};
-function spr(key, fn) { if (_spr[key]) return _spr[key]; const prev = D; const r = fn(); D = prev; return _spr[key] = r; }
+function spr(key, fn) {
+  if (_spr[key]) return _spr[key]; const prev = D; let r = fn(); D = prev;
+  if (PAINT_KEYS.test(key) && r && r.getContext) r = paintSprite(r, key.startsWith('tower_') ? { top: 0.06, ao: 8 } : key.startsWith('prop_') || key.startsWith('fence_') ? { top: 0.08, ao: 3 } : {});
+  return _spr[key] = r;
+}
 
 function treeImg(kind, s, v = 0) {
   return spr(`tree_${kind}_${s}_${v}`, () => {
@@ -1581,12 +1682,45 @@ function pineImg(s, v) {
 function bushImg(s, v = 0) {
   return spr(`bush_${s}_${v}`, () => {
     const p = new Pix(20, 16);
-    const tones = s === 0 ? LEAF.spring : s === 1 ? LEAF.summer : s === 2 ? (v % 2 ? LEAF.red : LEAF.orange) : LEAF.summer;
+    const tones = s === 0 ? LEAF.spring : s === 1 ? LEAF.summer : s === 2 ? (v % 2 ? LEAF.red : LEAF.orange) : LEAF.pineW;
     shadeBlob(p, [{ x: 6, y: 9, r: 5 }, { x: 13, y: 9, r: 5 }, { x: 10, y: 7, r: 6 }], tones, v * 13, 0, 7);
+    // winter: a soft blanket of snow settled over the top of the bush
+    if (s === 3) for (let x = 0; x < 20; x++) { let y0 = 0; while (y0 < 16 && !p.g(x, y0)) y0++; const d = 2 + Math.round(h2(x, 0, 39 + v) * 2); for (let y = y0; y < Math.min(16, y0 + d); y++) p.s(x, y, y === y0 + d - 1 ? '#c8d4ea' : y === y0 ? '#ffffff' : '#eef3fb', 1); }
     if (s === 0 || s === 1) for (let y = 0; y < 16; y++) for (let x = 0; x < 20; x++) if (p.g(x, y) && h2(x, y, 33 + v) > 0.94) p.s(x, y, s === 0 ? (v % 2 ? '#ffffff' : '#ffb2d0') : '#ff5a4a', 1);
     outlinePix(p);
     let c = p.canvas(); if (s === 3) c = snowify(c, 3, 1.5);
     return c;
+  });
+}
+/* the lighthouse on its rocky point at the east end of Cedar Lake (same one as on the title screen) */
+const LIGHTHOUSE_LAMP = { x: 16, y: 8 };
+function lighthouseImg(s, lit) {
+  return spr(`prop_lighthouse_${s}_${lit}`, () => {
+    const c = mk(32, 66); on(c);
+    // rocks and foam
+    const rock = s === 3 ? ['#5c5670', '#7e7892', '#a29eb6'] : ['#4e4652', '#6e6672', '#948a92'];
+    ell(16, 60, 14, 5, '#e8f4ff'); ell(16, 59, 13, 4, rock[0]);
+    for (const [x, y, r] of [[8, 57, 5], [23, 57, 5], [15, 56, 6], [11, 60, 4], [21, 60, 4]]) { ell(x, y, r, r - 1, rock[0]); ell(x - 1, y - 1, r - 1, r - 2, rock[1]); ell(x - 2, y - 2, Math.max(1, r - 3), Math.max(1, r - 4), rock[2]); }
+    // tapered tower, red bands, lit from the left
+    for (let y = 14; y < 56; y++) {
+      const hw = Math.round(5 + (y - 14) / 42 * 3), band = (y >= 22 && y < 27) || (y >= 36 && y < 41) || (y >= 50 && y < 55);
+      for (let x = -hw; x <= hw; x++) {
+        const base = band ? '#c8423a' : '#f4efe6', rel = x / hw;
+        P(16 + x, y, rel < -0.55 ? lt(base, .12) : rel > 0.45 ? mix(base, '#4a3a6a', 0.3) : rel > 0.1 ? mix(base, '#4a3a6a', 0.12) : base);
+      }
+      P(16 - hw - 1, y, '#2a1e2e'); P(16 + hw + 1, y, '#2a1e2e');
+    }
+    R(14, 30, 3, 4, '#2a2236'); P(14, 30, '#5a8ab0');                       // window
+    R(14, 47, 4, 8, '#3a2a24'); R(15, 46, 2, 1, '#3a2a24'); P(15, 50, '#c8a440'); // door
+    // gallery and railing
+    R(7, 12, 18, 2, '#2a1e2e'); HL(8, 12, 16, '#4c4660'); for (let x = 8; x < 25; x += 2) P(x, 11, '#2a1e2e');
+    // lantern room
+    R(11, 4, 10, 8, '#2a1e2e'); R(12, 5, 8, 6, lit ? '#ffe9a0' : '#9fc6de'); if (lit) R(14, 6, 4, 4, '#fffbe0'); else { P(12, 5, '#e8f4ff'); P(13, 5, '#e8f4ff'); }
+    VL(15, 5, 6, '#2a1e2e'); VL(17, 5, 6, '#2a1e2e');
+    // red dome cap and finial
+    for (let y = 0; y < 4; y++) { const w = 2 + y * 2; R(16 - w, 1 + y, w * 2, 1, y === 3 ? '#8a2a2a' : '#c8423a'); P(16 - w, 1 + y, '#e8705a'); }
+    P(16, 0, '#2a1e2e');
+    return snowify(c, s, 1.5);
   });
 }
 function bigTreeImg(s) {
@@ -1887,6 +2021,8 @@ function icon(name, x, y, g = ctx) { g.drawImage(iconCanvas(name), Math.round(x)
 const TRIM = '#f4efe2';
 function drawWindow(x, y, w, h, o, lit) {
   const fr = o.frame || TRIM, fd = dk(fr, .35);
+  // header board above the window, catching the light
+  R(x - 2, y - 4, w + 4, 3, dk(fr, .2)); HL(x - 2, y - 4, w + 4, lt(fr, .2)); HL(x - 2, y - 2, w + 4, dk(o.wallC || '#888', .4));
   R(x - 1, y - 1, w + 2, h + 2, dk(o.wallC || '#888', .45));
   R(x, y, w, h, fr);
   const gx = x + 1, gy = y + 1, gw = w - 2, gh = h - 2;
@@ -1925,8 +2061,8 @@ function makeBuilding(spec, s, lit) {
   for (let y = wy0; y <= wy1; y++) for (let x = ox; x < ox + Wt; x++) {
     const X = x - ox, Y = y - wy0; let col = wc;
     switch (spec.wall) {
-      case 'wood': { const iy = Y % 5; col = iy === 0 ? lt(wc, .22) : iy === 4 ? dk(wc, .16) : wc; if (h2(Math.floor(X / 23), Math.floor(Y / 5), 3) > 0.8 && iy !== 0) col = mix(col, dk(wc, .1), .5); break; }
-      case 'brick': { const row = Math.floor(Y / 4), iy = Y % 4, ix = (X + (row & 1) * 4) % 8; col = (iy === 3 || ix === 0) ? (spec.mortar || '#d9cfc2') : (h2(Math.floor((X + (row & 1) * 4) / 8), row, 5) > 0.7 ? dk(wc, .12) : wc); if (iy === 0 && ix !== 0) col = lt(col, .12); break; }
+      case 'wood': { const iy = Y % 5, bd = Math.floor(Y / 5), seam = (X + Math.floor(h2(bd, 0, 4) * 40)) % 40 === 0; col = iy === 0 ? lt(wc, .22) : iy === 4 ? dk(wc, .16) : wc; if (h2(Math.floor(X / 23), bd, 3) > 0.8 && iy !== 0) col = mix(col, dk(wc, .1), .5); if (iy > 0 && iy < 4 && vnoise(X / 6, bd * 3.1, 8) > 0.68) col = mix(col, dk(wc, .12), .45); if (seam && iy) col = dk(wc, .22); break; }
+      case 'brick': { const row = Math.floor(Y / 4), iy = Y % 4, ix = (X + (row & 1) * 4) % 8; const bk = h2(Math.floor((X + (row & 1) * 4) / 8), row, 5); col = (iy === 3 || ix === 0) ? (spec.mortar || '#d9cfc2') : bk > 0.86 ? mix(wc, '#6a3a34', .3) : bk > 0.66 ? dk(wc, .12) : bk < 0.15 ? lt(wc, .1) : wc; if (iy === 0 && ix !== 0) col = lt(col, .12); if (iy === 2 && ix === 7) col = dk(col, .1); break; }
       case 'stone': { const row = Math.floor(Y / 6), iy = Y % 6, off = Math.floor(h2(row, 1, 9) * 7), ix = (X + off) % 9; col = (iy === 5 || ix === 0) ? dk(wc, .35) : (h2(Math.floor((X + off) / 9), row, 6) > 0.6 ? lt(wc, .1) : wc); if (iy === 0 && ix > 0) col = lt(col, .18); break; }
       case 'log': { const iy = Y % 6; col = iy === 0 ? lt(wc, .25) : iy < 3 ? wc : iy < 5 ? dk(wc, .15) : dk(wc, .4); break; }
       default: { col = h2(X, Y, 7) > 0.93 ? dk(wc, .06) : wc; }
@@ -1971,6 +2107,13 @@ function makeBuilding(spec, s, lit) {
       P(dx + dw - 3, dy + 10, '#f8d050'); P(dx + dw - 3, dy + 11, '#c8861e');
       if (d.w > 14) VL(dx + Math.floor(dw / 2), dy, dh, dk(dc, .35));
     }
+    // a little shingled hood over a house's front door, on two brackets
+    if (!spec.barn && d.style !== 'glass' && dy - 7 > eave + 3) {
+      const hx0 = dx - 4, hw = dw + 8, hy = dy - 7, hc = spec.roof;
+      R(hx0, hy, hw, 4, dk(hc, .1)); HL(hx0, hy, hw, lt(hc, .3)); HL(hx0, hy + 1, hw, lt(hc, .1)); for (let i = 0; i < hw; i += 3) P(hx0 + i, hy + 2, dk(hc, .3));
+      HL(hx0, hy + 4, hw, spec.trim || TRIM); HL(hx0, hy + 5, hw, 'rgba(30,16,40,0.35)');
+      for (const bx_ of [hx0 + 1, hx0 + hw - 2]) { VL(bx_, hy + 5, 3, dk(spec.trim || TRIM, .3)); P(bx_ + (bx_ < dx ? 1 : -1), hy + 6, dk(spec.trim || TRIM, .3)); }
+    }
     // step + mat
     R(dx - 3, wy1 + 1, dw + 6, 2, '#b4aab8'); HL(dx - 3, wy1 + 1, dw + 6, '#d6d0dc'); HL(dx - 3, wy1 + 3, dw + 6, '#6c6474');
     out.door = { x: dx, y: dy, w: dw, h: dh };
@@ -2001,12 +2144,14 @@ function makeBuilding(spec, s, lit) {
       let col = iy === 0 ? R3 : iy === 3 ? R1 : R2;
       if (ix === 0 && iy > 0 && iy < 3) col = R1;
       if (iy > 0 && iy < 3 && h2(Math.floor((x + off) / 8), row, 21) > 0.82) col = mix(col, R3, .45);
+      const tab = h2(Math.floor((x + off) / 8), row, 22); if (iy > 0) col = mix(col, tab > 0.5 ? R3 : R1, Math.abs(tab - 0.5) * 0.5);
+      if (ix === 7 && iy > 0 && iy < 3) col = mix(col, R1, .4);
       if (hip && (x < x0 + inset + 2 + (hip ? 6 * (1 - t) : 0))) col = mix(col, R3, .35);
       if (hip && (x > x1 - inset - 2 - (hip ? 6 * (1 - t) : 0))) col = mix(col, R1, .5);
       if (x === x0 + inset || x === x1 - inset) col = R0;
       if (y === roofTop) col = R0;
       if (y === roofTop + 1 || y === roofTop + 2) col = y === roofTop + 1 ? R4 : R3;
-      if (y >= eave) col = y === eave + 1 ? R0 : R1;
+      if (y >= eave) col = y === eave + 1 ? R0 : (spec.trim || lt(rc, .55));   // fascia board along the eave
       P(x, y, col);
     }
   }
@@ -2056,6 +2201,8 @@ function makeBuilding(spec, s, lit) {
     const ic = iconCanvas(spec.icon); D.drawImage(ic, ix + 2, iy + 2);
   }
   if (s === 3 && spec.chimney != null) R(ox + spec.chimney * 16 + 3, roofTop - 9, 10, 2, '#ffffff');
+  // soft light: roof catches the sun, walls shade toward the ground
+  paintSprite(c, { top: 0.12, side: 0.07, ao: Math.min(10, wallH * 0.3), aoAmt: 0.14 });
   return out;
 }
 
@@ -2168,7 +2315,7 @@ function renderInterior(map) {
   for (const r of map.rugs || []) rug(r.x * 16 + (r.dx || 0), r.y * 16 + (r.dy || 0), r.w * 16 - (r.dw || 0), r.h * 16 - (r.dh || 0), r.c || '#b84a4a', r.c2 || '#f2d07a');
   // exit mat
   if (map.exit) { const ex = map.exit.x * 16, ey = (map.h - 1) * 16; R(ex + 1, ey + 6, 14, 10, '#6a3a2a'); R(ex + 2, ey + 7, 12, 8, '#a8523c'); for (let i = 0; i < 12; i += 2) VL(ex + 2 + i, ey + 7, 8, '#c06a4c'); }
-  return c;
+  return paintGround(c, 0, true);
 }
 function rug(x, y, w, h, c, c2) {
   R(x, y, w, h, dk(c, .3)); R(x + 1, y + 1, w - 2, h - 2, c); R(x + 3, y + 3, w - 6, h - 6, c2); R(x + 4, y + 4, w - 8, h - 8, c);
@@ -2392,8 +2539,8 @@ const BIZ_UPGRADES = {
 /* ---------- townsfolk ---------- */
 const L_ = (skin, hair, hairC, top, topC, bot, botC, shoeC, hat = 'none', hatC = 0, eye = 0) => ({ skin, hair, hairC, top, topC, bot, botC, shoeC, hat, hatC, eye });
 const NPCS = {
-  mayor: { n: 'Mayor Hollis', look: L_(0, 0, 5, 'jacket', 7, 'pants', 12, 13), opt: { acc: ['mustache'] } },
-  rosa: { n: 'Rosa', look: L_(2, 4, 4, 'overalls', 0, 'pants', 14, 12, 'cap', 0) },
+  mayor: { n: 'Mayor Hollis', look: L_(0, 0, 5, 'jacket', 7, 'pants', 12, 13, 'tophat', 12), opt: { acc: ['mustache'] } },
+  rosa: { n: 'Rosa', look: L_(2, 4, 4, 'overalls', 5, 'pants', 14, 12, 'cap', 4) },
   bea: { n: 'Bea', look: L_(1, 2, 3, 'sweater', 5, 'skirt', 13, 13), opt: { apron: '#f4efe4' } },
   mei: { n: 'Mei', look: L_(1, 2, 1, 'long', 10, 'pants', 12, 12), opt: { apron: '#3b8a4c' } },
   gus: { n: 'Gus', look: L_(3, 0, 1, 'tee', 6, 'pants', 15, 13), opt: { apron: '#d9473e', acc: ['beard'] } },
@@ -2408,7 +2555,7 @@ const NPCS = {
   tom: { n: 'Tom', look: L_(1, 1, 0, 'tee', 0, 'shorts', 7, 10), opt: { kid: true } },
   lily: { n: 'Lily', look: L_(3, 5, 4, 'dress', 2, 'skirt', 2, 9), opt: { kid: true } },
   jun: { n: 'Jun', look: L_(0, 1, 7, 'hoodie', 12, 'pants', 14, 10, 'cap', 5) },
-  marge: { n: 'Marge', look: L_(1, 2, 5, 'long', 9, 'skirt', 7, 13) },
+  marge: { n: 'Marge', look: L_(1, 2, 9, 'long', 9, 'skirt', 7, 13) },
   theo: { n: 'Theo', look: L_(4, 0, 1, 'tee', 3, 'shorts', 12, 10) },
 };
 /* daily schedules: returns {m: map, x, y, d: dir, w: wander radius} or null (at home) */
@@ -2796,6 +2943,7 @@ function buildTown() {
   for (let x = 3; x <= 9; x++) if (x !== 6) addProp(m, 'fenceH', x, 37, 1, 1, { fk: 'white' });
   // lake boat + dock posts
   m.add({ type: 'prop', kind: 'boat', tx: 47, ty: 41, fw: 2, fh: 1, float: 1 });
+  m.add({ type: 'lighthouse', tx: 60, ty: 37 });   // scenery on its rocky point in the water (water is already solid)
   // ---- trees
   const T = (k, x, y) => addTree(m, k, x, y);
   const forest = (x0, y0, x1, y1, kinds, step = 2) => { for (let y = y0; y <= y1; y += step) for (let x = x0 + ((y / step) & 1); x <= x1; x += step) { if (h2(x, y, 3) < 0.12) continue; let ok = true; for (let yy = y - 1; yy <= y; yy++) for (let xx = x; xx <= x + 1; xx++) { const t = m.T(xx, yy); if (!(t === TER.GRASS || t === TER.HIGH) || (m.in(xx, yy) && m.solid[m.i(xx, yy)])) ok = false; } if (ok) T(kinds[Math.floor(h2(x, y, 5) * kinds.length)], x, y); } };
@@ -3621,11 +3769,20 @@ function updateWeather(dt) {
   if (s === 0 && w === 'sun' && wp.length < 14 && rnd() < dt * 2) wp.push({ k: 'petal', x: rnd() * W, y: -4, v: .6 + rnd() * .6, t: rnd() * 9 });
   if (s === 2 && w !== 'rain' && wp.length < 16 && rnd() < dt * 2.5) wp.push({ k: 'leaf', x: rnd() * W, y: -4, v: .6 + rnd() * .6, t: rnd() * 9, c: pick(['#e8742a', '#c84a2e', '#f2b23c']) });
   if (s === 1 && (hr > 20 || hr < 4) && w !== 'rain' && w !== 'storm' && wp.filter(q => q.k === 'ffly').length < 14 && rnd() < dt * 3) wp.push({ k: 'ffly', wx: G.cam.x + rnd() * W, wy: G.cam.y + rnd() * H, t: rnd() * 9, life: 6 + rnd() * 6 });
+  // now and then a few birds cross high overhead
+  if (w !== 'rain' && w !== 'storm' && hr > 6 && hr < 20 && !wp.some(q => q.k === 'flock') && rnd() < dt / 14) { const left = rnd() < 0.5; wp.push({ k: 'flock', x: left ? -40 : W + 40, y: 10 + rnd() * H * 0.5, vx: (left ? 1 : -1) * (24 + rnd() * 12), n: 3 + Math.floor(rnd() * 3), t: 0 }); }
+  let settled = wp.filter(q => q.k === 'flake').length;
   for (const q of wp) {
     q.t += dt;
     if (q.k === 'rain') { q.x += 60 * dt * q.v; q.y += 300 * dt * q.v; if (q.y > H * (0.4 + (q.t * 7 % 1) * 0.6)) { q.splash = 0.15; q.k = 'splash'; } }
     else if (q.k === 'splash') { q.splash -= dt; if (q.splash <= 0) { q.k = w === 'snow' ? 'snow' : 'rain'; q.x = rnd() * (W + 60) - 30; q.y = -10; } }
-    else if (q.k === 'snow') { q.x += Math.sin(q.t * 1.5) * 12 * dt + 6 * dt; q.y += 22 * dt * q.v; if (q.y > H) { q.y = -4; q.x = rnd() * W; } }
+    else if (q.k === 'snow') {
+      q.x += Math.sin(q.t * 1.5) * 12 * dt + 6 * dt; q.y += 22 * dt * q.v;
+      q.land = q.land || H * (0.2 + rnd() * 0.8);
+      if (q.y > q.land) { if (settled < 90) { settled++; wp.push({ k: 'flake', wx: G.cam.x + q.x, wy: G.cam.y + q.y, t: 0, life: 2.5 + rnd() * 2 }); } q.y = -4; q.x = rnd() * W; q.land = 0; }
+    }
+    else if (q.k === 'flake') { q.life -= dt; if (q.life <= 0) q.dead = 1; }
+    else if (q.k === 'flock') { q.x += q.vx * dt; q.y += Math.sin(q.t * 0.7) * 3 * dt; if (q.x < -60 || q.x > W + 60) q.dead = 1; }
     else if (q.k === 'petal' || q.k === 'leaf') { q.x += (20 + Math.sin(q.t * 2) * 18) * dt; q.y += 18 * dt * q.v; if (q.y > H || q.x > W + 8) q.dead = 1; }
     else if (q.k === 'ffly') { q.wx += Math.sin(q.t * .9) * 8 * dt; q.wy += Math.cos(q.t * 1.2) * 6 * dt; q.life -= dt; if (q.life <= 0) q.dead = 1; }
   }
@@ -3638,8 +3795,16 @@ function drawWeather(cx, cy) {
   for (const q of G.wparts || []) {
     if (q.k === 'rain') { ctx.fillStyle = 'rgba(210,225,255,0.55)'; ctx.fillRect(q.x | 0, q.y | 0, 1, 5); ctx.fillRect((q.x | 0) + 1, (q.y | 0) + 5, 1, 2); }
     else if (q.k === 'splash') { ctx.fillStyle = 'rgba(230,240,255,0.7)'; const s = q.splash > .08 ? 1 : 2; ctx.fillRect((q.x | 0) - s, q.y | 0, 1, 1); ctx.fillRect((q.x | 0) + s, q.y | 0, 1, 1); if (s === 2) ctx.fillRect(q.x | 0, (q.y | 0) - 1, 1, 1); }
-    else if (q.k === 'snow') { ctx.fillStyle = '#ffffff'; ctx.fillRect(q.x | 0, q.y | 0, q.v > 1.1 ? 2 : 1, q.v > 1.1 ? 2 : 1); }
+    else if (q.k === 'snow') { const big = q.v > 1.0; ctx.fillStyle = '#ffffff'; ctx.fillRect(q.x | 0, q.y | 0, big ? 2 : 1, big ? 2 : 1); if (big) { ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fillRect((q.x | 0) - 1, q.y | 0, 1, 2); ctx.fillRect((q.x | 0) + 2, q.y | 0, 1, 2); } }
     else if (q.k === 'petal') { ctx.fillStyle = '#ffc4de'; ctx.fillRect(q.x | 0, q.y | 0, 2, 1); ctx.fillStyle = '#ff9ac4'; ctx.fillRect((q.x | 0) + (Math.sin(q.t * 6) > 0 ? 1 : 0), (q.y | 0) + 1, 1, 1); }
+    else if (q.k === 'flake') { ctx.globalAlpha = Math.min(1, q.life / 1.2) * 0.95; ctx.fillStyle = '#ffffff'; ctx.fillRect(Math.round(q.wx - cx), Math.round(q.wy - cy), 1, 1); ctx.globalAlpha = 1; }
+    else if (q.k === 'flock') {
+      for (let i = 0; i < q.n; i++) {
+        const bx = Math.round(q.x - Math.sign(q.vx) * (i * 7 + (i % 2) * 2)), by = Math.round(q.y + (i % 2 ? 4 : -1) * Math.ceil(i / 2) * 1.5), up = Math.sin(q.t * 9 + i * 1.3) > 0;
+        ctx.fillStyle = 'rgba(30,20,50,0.18)'; ctx.fillRect(bx + 26, by + 34, 3, 1);
+        ctx.fillStyle = '#3a2a3e'; ctx.fillRect(bx, by, 1, 1); if (up) { ctx.fillRect(bx - 1, by - 1, 1, 1); ctx.fillRect(bx + 1, by - 1, 1, 1); } else { ctx.fillRect(bx - 1, by, 1, 1); ctx.fillRect(bx + 1, by, 1, 1); ctx.fillRect(bx - 2, by + 1, 1, 1); ctx.fillRect(bx + 2, by + 1, 1, 1); }
+      }
+    }
     else if (q.k === 'leaf') { ctx.fillStyle = q.c; const f = Math.sin(q.t * 5) > 0; ctx.fillRect(q.x | 0, q.y | 0, f ? 2 : 1, f ? 1 : 2); ctx.fillStyle = dk(q.c, .3); ctx.fillRect((q.x | 0) + 1, (q.y | 0) + 1, 1, 1); }
   }
 }
@@ -3648,40 +3813,63 @@ function objDraws(m, s, lit, cx, cy, list, under) {
   const vx0 = cx - 120, vx1 = cx + W + 120, vy0 = cy - 40, vy1 = cy + H + 200;
   for (const o of m.objs) {
     const bx = o.tx * 16, by = (o.ty + 1) * 16;
-    if (bx < vx0 - 64 || bx > vx1 || by < vy0 || by > vy1) continue;
+    if (bx < vx0 - 64 || bx > vx1 || by + (o.spec ? o.spec.h * 16 : 0) < vy0 || by > vy1) continue;   // tall buildings stay until their base leaves the screen
     switch (o.type) {
       case 'bld': {
         const b = bldImg(o, s, lit); const x = o.tx * 16 - 4 - cx, y = o.ty * 16 - (o.spec.top ?? 12) - cy;
+        G.occ.push([b.img, x, y]);
+        under.push(() => { castShadow(b.img, x, y, (o.ty + o.spec.h) * 16 - cy); ctx.fillStyle = 'rgba(40,20,50,0.22)'; ctx.fillRect(x + 3, (o.ty + o.spec.h) * 16 - cy, o.spec.w * 16 + 2, 2); ctx.fillStyle = 'rgba(40,20,50,0.1)'; ctx.fillRect(x + 2, (o.ty + o.spec.h) * 16 - cy + 2, o.spec.w * 16 + 4, 2); });
         list.push({ y: (o.ty + o.spec.h) * 16, f: () => {
           ctx.drawImage(b.img, x, y);
           if (G.doorAnim && G.doorAnim.bid === o.id && b.door) { ctx.fillStyle = '#120c18'; ctx.fillRect(x + b.door.x, y + b.door.y, b.door.w, b.door.h); }
           if (b.smoke && (S.season === 3 || S.season === 2 || hourOf(S.min) < 9 || hourOf(S.min) > 17)) smoke(x + b.smoke.x, y + b.smoke.y, o.tx);
         } });
-        if (lit) for (const L of b.lights) G.lights.push({ x: o.tx * 16 - 4 + L.x, y: o.ty * 16 - (o.spec.top ?? 12) + L.y, r: L.r + (L.lamp ? 4 : 8) });
+        if (lit) for (const L of b.lights) {
+          const lx = o.tx * 16 - 4 + L.x, ly = o.ty * 16 - (o.spec.top ?? 12) + L.y, base = (o.ty + o.spec.h) * 16;
+          G.lights.push({ x: lx, y: ly, r: L.r + (L.lamp ? 4 : 8), c: L.lamp ? '#ffd890' : '#ffc77a', fl: L.lamp ? lx * 0.37 : null });
+          // warm light spilling onto the ground in front of lit windows and porch lamps
+          if (ly > base - 40) G.lights.push({ x: lx, y: base + 4, r: L.lamp ? 22 : Math.min(30, L.r + 10), c: '#ffb868', pool: 1, i: 0.75 });
+        }
         break;
       }
       case 'tree': {
         const img = treeImg(o.kind, s, o.v), pine = o.kind === 'pine';
         const x = o.tx * 16 + (pine ? 2 : 0) - cx, y = by - img.height - cy + 2;
-        under.push(() => ctx.drawImage(shadowImg(28, 8), o.tx * 16 + 2 - cx, by - 6 - cy));
-        list.push({ y: by, f: () => ctx.drawImage(img, x, y) });
+        G.occ.push([img, x, y]);
+        under.push(() => { castShadow(img, x, y, by - cy - 1); ctx.drawImage(shadowImg(26, 7), o.tx * 16 + 3 - cx, by - 6 - cy); });
+        list.push({ y: by, f: () => drawSway(img, x, y, o.tx * 1.7 + o.ty, pine ? 0.6 : 1) });
         break;
       }
       case 'tower': {
         const img = clockTowerImg(s), x = o.tx * 16 - 4 - cx, y = by - img.height + 2 - cy;
+        G.occ.push([img, x, y]); under.push(() => castShadow(img, x, y, by - cy));
         list.push({ y: by, f: () => { ctx.drawImage(img, x, y); drawClockHands(x + TOWER_CLOCK.x, y + TOWER_CLOCK.y); } });
         if (lit) G.lights.push({ x: o.tx * 16 + 24, y: by - img.height + TOWER_CLOCK.y, r: 20 });
         break;
       }
       case 'fountain': {
         const img = fountainImg(s), x = o.tx * 16 - cx, y = by - 40 - cy;
+        G.occ.push([img, x, y]); under.push(() => castShadow(img, x, y, by - cy, 0.6));
         list.push({ y: by, f: () => { ctx.drawImage(img, x, y); if (s !== 3) fountainWater(x, y); } });
         break;
       }
       case 'bigtree': {
         const img = bigTreeImg(s), x = o.tx * 16 + 40 - 50 - cx, y = by - 100 + 6 - cy;
-        under.push(() => ctx.drawImage(shadowImg(70, 14), o.tx * 16 + 5 - cx, by - 10 - cy));
+        G.occ.push([img, x, y]);
+        under.push(() => { castShadow(img, x, y, by - cy - 4); ctx.drawImage(shadowImg(70, 14), o.tx * 16 + 5 - cx, by - 10 - cy); });
+        list.push({ y: by, f: () => drawSway(img, x, y, o.tx, 0.7) });
+        break;
+      }
+      case 'lighthouse': {
+        const img = lighthouseImg(s, lit), x = o.tx * 16 - 8 - cx, y = by + 6 - img.height - cy;
+        G.occ.push([img, x, y]); under.push(() => castShadow(img, x, y, by + 2 - cy));
         list.push({ y: by, f: () => ctx.drawImage(img, x, y) });
+        if (lit) {
+          // the lamp, and its beam sweeping slowly across the lake
+          const lx = o.tx * 16 - 8 + LIGHTHOUSE_LAMP.x, ly = by + 6 - img.height + LIGHTHOUSE_LAMP.y, a = G.t * 0.8;
+          G.lights.push({ x: lx, y: ly, r: 24, c: '#fff0c0' });
+          for (const [d, r, i] of [[22, 12, 0.5], [36, 15, 0.42], [52, 19, 0.36], [70, 23, 0.3], [92, 27, 0.24], [116, 31, 0.18], [142, 35, 0.12]]) G.lights.push({ x: lx + Math.cos(a) * d, y: ly + Math.sin(a) * d * 0.55, r, c: '#fff4d0', i });
+        }
         break;
       }
       case 'crop': if (s < 3) { const img = cropImg(s, o.v); list.push({ y: by - 2, f: () => ctx.drawImage(img, bx - cx, by - 24 - cy) }); } break;
@@ -3693,8 +3881,9 @@ function objDraws(m, s, lit, cx, cy, list, under) {
         const x = bx + Math.floor((o.fw * 16 - img.width) / 2) - cx; let y = by - img.height - cy + (o.kind === 'boat' ? Math.round(Math.sin(G.t * 1.5)) : 0);
         if (o.kind === 'boat') { under.push(() => ctx.drawImage(img, x, y)); break; }
         if (o.kind === 'tulips') { if (s !== 3) under.push(() => ctx.drawImage(img, x, y)); break; }
-        list.push({ y: by - (o.kind === 'fenceH' ? 2 : 0), f: () => ctx.drawImage(img, x, y) });
-        if (o.kind === 'lamp' && lit) G.lights.push({ x: bx + 8, y: by - 24, r: 30, c: '#ffb456' });
+        G.occ.push([img, x, y]); under.push(() => castShadow(img, x, y, by - cy - (o.kind === 'fenceH' ? 2 : 0)));
+        list.push({ y: by - (o.kind === 'fenceH' ? 2 : 0), f: () => { if (o.kind === 'bush') drawSway(img, x, y, o.tx + o.ty, 0.5); else { ctx.drawImage(img, x, y); if (o.kind === 'lamp' || o.kind === 'sign' || o.kind === 'well' || o.kind === 'scarecrow' || o.kind === 'rock') drawRim(img, x, y); } } });
+        if (o.kind === 'lamp' && lit) G.lights.push({ x: bx + 8, y: by - 25, r: 16, c: '#ffd890', fl: o.tx * 3.1 + o.ty }, { x: bx + 8, y: by - 2, r: 38, c: '#ffb456', pool: 1, fl: o.tx * 3.1 + o.ty });
         break;
       }
       case 'furn': {
@@ -3702,18 +3891,36 @@ function objDraws(m, s, lit, cx, cy, list, under) {
         const img = furn(o.kind, o.o); if (!img) break;
         if (o.wall) {
           const x = o.tx * 16 + (o.dx || 0) - cx, y = (o.ty + 1) * 16 - img.height + (o.dy || 0) - 2 - cy;
+          if (o.win) { const hr = S.min / 60; if (hr > 6.5 && hr < 18.5 && S.weather !== 'storm') G.shafts.push({ x: x + 2, y: y + 18, w: 24, a: Math.min(1, (hr - 6.5), (18.5 - hr)) * (S.weather === 'sun' ? 1 : 0.4) }); }
           under.push(() => { if (o.win) { ctx.fillStyle = skyColor(); ctx.fillRect(x + 2, y + 2, 24, 16); ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fillRect(x + 4, y + 3, 2, 6); if (S.weather === 'rain' || S.weather === 'storm') { ctx.fillStyle = 'rgba(220,235,255,0.6)'; for (let i = 0; i < 5; i++) ctx.fillRect(x + 3 + ((i * 5 + G.t * 30) % 22 | 0), y + 3 + ((i * 7 + G.t * 60) % 13 | 0), 1, 2); } } ctx.drawImage(img, x, y); });
           break;
         }
         const x = bx + Math.floor((o.fw * 16 - img.width) / 2) + (o.dx || 0) - cx;
         let y = by - img.height + (o.dy || 0) - cy;
         if (o.onTop) y -= 15;
+        if (!o.onTop && !/rug|mat/.test(o.kind)) under.push(() => ctx.drawImage(shadowImg(Math.max(8, img.width - 2), 6), x + 1, y + img.height - 4));
         list.push({ y: by + (o.onTop ? 1 : 0), f: () => { ctx.drawImage(img, x, y); if (o.fire) fireAnim(x + 16, y + 30); } });
-        if (o.fire) G.lights.push({ x: bx + 16, y: by - 6, r: 30, c: '#ffb060' });
+        if (o.fire) G.lights.push({ x: bx + 16, y: by - 6, r: 34, c: '#ffb060', fl: bx * 0.7 });
         break;
       }
     }
   }
+}
+/* trees and bushes breathe in the breeze: the crown sways a pixel, the trunk stays put */
+function drawSway(img, x, y, seed, amt) {
+  const wind = S.weather === 'storm' ? 2.4 : S.weather === 'rain' || S.weather === 'cloud' ? 1.4 : 1;
+  const w = Math.sin(G.t * (1.1 + wind * 0.4) + seed) + Math.sin(G.t * 2.3 + seed * 1.7) * 0.35;
+  const off = Math.round(w * amt * wind * 0.9);
+  swayBlit(img, x, y, off);
+  if (RIM.a > 0.02) { ctx.globalAlpha = RIM.a; swayBlit(rimSprite(img, RIM.dir), x, y, off); ctx.globalAlpha = 1; }
+}
+function swayBlit(img, x, y, off) {
+  const h = img.height;
+  if (!off) { ctx.drawImage(img, x, y); return; }
+  const a = Math.floor(h * 0.3), b = Math.floor(h * 0.62);
+  ctx.drawImage(img, 0, 0, img.width, a, x + off, y, img.width, a);
+  ctx.drawImage(img, 0, a, img.width, b - a, x + Math.round(off / 2), y + a, img.width, b - a);
+  ctx.drawImage(img, 0, b, img.width, h - b, x, y + b, img.width, h - b);
 }
 function skyColor() {
   const t = timeTint(S.min, S.season); const base = S.weather === 'sun' ? '#8cc8f0' : S.weather === 'snow' ? '#d8e2f0' : '#a8b4c4';
@@ -3753,26 +3960,39 @@ const _smoke = {};
 function smoke(x, y, seed) {
   for (let i = 0; i < 5; i++) {
     const a = (G.t * .25 + i / 5 + seed * .13) % 1; const px = x + Math.sin(a * 6 + seed) * 3 + a * 8 * (G.wind || 1), py = y - a * 26;
-    ctx.fillStyle = `rgba(230,230,240,${0.55 * (1 - a)})`; const r = 1 + Math.floor(a * 3);
-    ctx.fillRect(Math.round(px - r), Math.round(py - r), r * 2, r * 2);
+    // soft round puffs that swell and thin out as they rise
+    const r = 1.2 + a * 3.2;
+    ctx.fillStyle = `rgba(150,144,172,${0.75 * (1 - a) * Math.min(1, a * 6)})`; ctx.beginPath(); ctx.arc(px, py, r, 0, TAU); ctx.fill();
+    ctx.fillStyle = `rgba(236,232,246,${0.35 * (1 - a)})`; ctx.beginPath(); ctx.arc(px - r * 0.3, py - r * 0.3, r * 0.55, 0, TAU); ctx.fill();
   }
 }
 function drawCharAt(ent, look, opt, bike, cx, cy) {
   const x = Math.round(ent.px) - cx, y = Math.round(ent.py) - cy;
   if (bike) {
     const bs = bikeSprites(look, opt), f = ent.moving ? Math.floor(ent.dist / 6) % 4 : 0;
-    if (ent.dir === 'l' || ent.dir === 'r') { ctx.drawImage(shadowImg(24, 6), x - 4, y + 12); ctx.drawImage(bs[ent.dir][f], x - 10, y - 18); }
-    else { ctx.drawImage(shadowImg(12, 6), x + 2, y + 12); ctx.drawImage(bs[ent.dir][f], x - 2, y - 17); }
+    if (ent.dir === 'l' || ent.dir === 'r') { castShadow(bs[ent.dir][f], x - 10, y - 18, y + 15, 0.8, true); ctx.drawImage(shadowImg(24, 6), x - 4, y + 12); ctx.drawImage(bs[ent.dir][f], x - 10, y - 18); drawRim(bs[ent.dir][f], x - 10, y - 18); }
+    else { castShadow(bs[ent.dir][f], x - 2, y - 17, y + 15, 0.8, true); ctx.drawImage(shadowImg(12, 6), x + 2, y + 12); ctx.drawImage(bs[ent.dir][f], x - 2, y - 17); drawRim(bs[ent.dir][f], x - 2, y - 17); }
   } else {
-    const sp = charSprites(look, opt).walk[ent.dir];
+    // standing still, everyone breathes: a slow one-pixel nod, out of step with each other
+    let fi = ent.wframe(); if (fi === 0 && !ent.moving && ent.bump <= 0 && Math.sin(G.t * 2.2 + (ent.px * 0.13 + ent.py * 0.07)) > 0.45) fi = 3;
+    const sp = charSprites(look, opt).walk[ent.dir], im = sp[fi] || sp[0];
+    castShadow(im, x - 2, y - 8, y + 15, 0.8, true);
     ctx.drawImage(shadowImg(14, 5), x + 1, y + 12);
-    ctx.drawImage(sp[ent.wframe()], x - 2, y - 8 + (opt && opt.kid ? 0 : 0));
+    ctx.drawImage(im, x - 2, y - 8); drawRim(im, x - 2, y - 8);
+    // blink every few seconds, each person on their own rhythm
+    if (ent.dir !== 'u' && (fi === 0 || fi === 3) && (G.t + ent.px * 0.37 + ent.py * 0.11) % 4.3 < 0.13) {
+      const k = lookColors(look), ey = y + 2 + (opt && opt.kid ? 2 : 0) + (fi === 3 ? 1 : 0);
+      for (const ex of ent.dir === 'd' ? [6, 12] : ent.dir === 'l' ? [5] : [13]) { ctx.fillStyle = k.S; ctx.fillRect(x - 2 + ex, ey, 2, 2); ctx.fillStyle = mix(k.s, '#3a2030', 0.5); ctx.fillRect(x - 2 + ex, ey + 1, 2, 1); }
+    }
   }
 }
 function drawWorld() {
   const m = G.map, s = S.season, cx = Math.round(G.cam.x), cy = Math.round(G.cam.y);
-  const dark = m.interior ? 0 : darkness(), lit = dark > 0.35;
-  G.lights = [];
+  const dark = m.interior ? 0 : darkness();
+  // windows and street lamps come on while the sun is still going down, like on the title screen
+  G.litEarly = !m.interior && dark <= 0.35 && S.min > 900 && skyState(S.min, S.season).ga > 0.17;
+  const lit = dark > 0.35 || G.litEarly;
+  G.lights = []; G.occ = []; G.shafts = []; shadowSetup(m);
   ctx.fillStyle = '#0d0a14'; ctx.fillRect(0, 0, W, H);
   if (!m.interior) {
     const wf = waterFrames(s, false), wd = waterFrames(s, true), ff = fallFrames(s), fi = Math.floor(G.t * 4) % 8, ffi = Math.floor(G.t * 14) % 6;
@@ -3795,12 +4015,14 @@ function drawWorld() {
     ctx.fillStyle = 'rgba(16,24,60,0.3)';
     for (let x = 40; x <= 46; x++) ctx.fillRect(x * 16 - cx, 40 * 16 - cy, 16, 4);
     for (let x = 40; x <= 42; x++) ctx.fillRect(x * 16 - cx, 23 * 16 - cy, 16, 5);
+    drawSkyOnWater(m, cx, cy, tx0, ty0, tx1, ty1);
   }
   ctx.drawImage(groundFor(m, s), -cx, -cy);
   if (m.gears) drawTowerGears(cx, cy);
   const list = [], under = [];
   objDraws(m, s, lit, cx, cy, list, under);
   for (const f of under) f();
+  for (const o of G.occ) shadowOccluder(o[0], o[1], o[2]);
   drawParts(cx, cy);
   // cloud shadows
   if (!m.interior && (S.weather === 'sun' || S.weather === 'cloud')) {
@@ -3824,31 +4046,24 @@ function drawWorld() {
   }
   list.sort((a, b) => a.y - b.y);
   for (const it of list) it.f();
+  // if a roof or chimney hides the player, show them through it as a soft silhouette
+  if (!m.interior) {
+    const px0 = p.px - 2, py0 = p.py - 8, pb = p.py + 16;
+    const hid = m.objs.some(o => o.type === 'bld' && (o.ty + o.spec.h) * 16 > pb && o.tx * 16 - 4 < px0 + 18 && (o.tx + o.spec.w) * 16 + 4 > px0 + 2 && o.ty * 16 - (o.spec.top ?? 12) - 24 < py0 + 22 && o.ty * 16 > py0);
+    if (hid) { const sh = SHADOW; SHADOW = { on: false }; ctx.globalAlpha = 0.45; drawCharAt(p, S.look, {}, S.onBike, cx, cy); ctx.globalAlpha = 1; SHADOW = sh; }
+  }
   if (G.doorAnim) { G.doorAnim.t -= 1 / 60; if (G.doorAnim.t <= 0) G.doorAnim = null; }
   if (!m.interior) drawFestival(cx, cy, lit);
   // fishing bobber
   if (G.fish) drawFishing(cx, cy);
   if (!m.interior) drawWeather(cx, cy);
-  // lighting
-  let tint = m.interior ? (hourOf(S.min) >= 19 || hourOf(S.min) < 6 ? '#f4e2cc' : '#ffffff') : mulCol(timeTint(S.min, S.season), WTINT[S.weather] || '#fff');
-  if (S.gear.lantern && !m.interior && dark > .3) G.lights.push({ x: p.px + 8, y: p.py + 4, r: 44, c: '#ffe8b0' });
+  // lighting & atmosphere (golden hour, night light pools, bloom)
+  if (S.gear.lantern && !m.interior && dark > .3) G.lights.push({ x: p.px + 8, y: p.py + 4, r: 44, c: '#ffe8b0' }, { x: p.px + 8, y: p.py + 15, r: 26, c: '#ffd890', pool: 1 });
+  // indoors after dark: the room's lamps make a warm pool, the corners fall into shadow
+  if (m.interior && (hourOf(S.min) >= 19 || hourOf(S.min) < 6)) G.lights.push({ x: m.w * 8, y: m.h * 8 + 8, r: 64, c: '#ffe0b0', i: 0.9, nb: 1 }, { x: m.w * 8, y: m.h * 8 + 8, r: 40, c: '#ffd090', i: 0.5, nb: 1 });
+  else if (!m.interior && dark > .3) G.lights.push({ x: p.px + 8, y: p.py + 6, r: 22, c: '#d8d0ff', i: 0.42 }); // keep the player readable in the dark
   for (const q of G.wparts || []) if (q.k === 'ffly') G.lights.push({ x: q.wx, y: q.wy, r: 6, c: '#d8ff80', i: (Math.sin(q.t * 3) + 1) / 2 });
-  if (tint !== '#ffffff') {
-    if (LC.width !== W || LC.height !== H) { LC.width = W; LC.height = H; }
-    const lx = LC.x; lx.globalCompositeOperation = 'source-over'; lx.fillStyle = tint; lx.fillRect(0, 0, W, H);
-    const lightAmt = m.interior ? .6 : dark;
-    if (lightAmt > 0.05) {
-      lx.globalCompositeOperation = 'lighter';
-      for (const L of G.lights) { const r = Math.round(L.r); const sx = Math.round(L.x - cx - r), sy = Math.round(L.y - cy - r); if (sx > W || sy > H || sx + r * 2 < 0 || sy + r * 2 < 0) continue; lx.globalAlpha = Math.min(1, lightAmt * (L.i ?? 1)); lx.drawImage(lightSprite(r, L.c || '#ffd890'), sx, sy); }
-      lx.globalAlpha = 1;
-    }
-    ctx.globalCompositeOperation = 'multiply'; ctx.drawImage(LC, 0, 0); ctx.globalCompositeOperation = 'source-over';
-    if (lightAmt > 0.3) {
-      ctx.globalCompositeOperation = 'lighter';
-      for (const L of G.lights) { if (L.r < 10) { ctx.globalAlpha = .9 * (L.i ?? 1); ctx.fillStyle = '#e8ff90'; ctx.fillRect(Math.round(L.x - cx), Math.round(L.y - cy), 1, 1); continue; } ctx.globalAlpha = 0.12 * lightAmt; ctx.drawImage(lightSprite(Math.round(L.r * .5), '#ffb860'), Math.round(L.x - cx - L.r * .5), Math.round(L.y - cy - L.r * .5)); }
-      ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
-    }
-  }
+  drawAtmosphere(m, dark, cx, cy);
   if (G.flash > 0) { ctx.fillStyle = `rgba(240,244,255,${G.flash * .7})`; ctx.fillRect(0, 0, W, H); }
   if (typeof MP !== 'undefined' && MP.on) MP.drawOverlay(cx, cy);
 }
@@ -3989,6 +4204,237 @@ function drawHUD() {
   G.toastTop = G.toasts.length ? ty + 14 : null; // co-op chat log sits above toasts
 }
 function toast(text, ic) { G.toasts.unshift({ text, icon: ic, t: 4 }); if (G.toasts.length > 3) G.toasts.length = 3; }
+
+// ---- 13a_light.js ----
+/* =====================================================================
+   LIGHT & ATMOSPHERE: golden-hour grading, soft light pools, glows.
+   Everything here is drawn over the finished world (before the HUD).
+   ===================================================================== */
+// minute of day -> ambient (multiplied over the world), sun glow colour + strength, warm grade, saturation lift,
+// and the colour the sky paints onto open water
+const SKYK = [
+  [0, '#2f3a7a', '#000000', 0, 0, 0.10, '#1c2a66'],
+  [290, '#2f3a7a', '#000000', 0, 0, 0.10, '#1c2a66'],
+  [330, '#62579a', '#ff9c84', 0.10, 0.08, 0.12, '#6a5aa0'],
+  [370, '#e8b0bc', '#ffa080', 0.20, 0.34, 0.20, '#ff9a8a'],
+  [420, '#ffdcc0', '#ffc28e', 0.16, 0.32, 0.18, '#ffc4a0'],
+  [500, '#fff4e6', '#ffe2b0', 0.06, 0.14, 0.16, '#bfe4ff'],
+  [700, '#fffaf2', '#fff0d2', 0.03, 0.11, 0.16, '#b4e0ff'],
+  [930, '#fff4e6', '#ffdcaa', 0.06, 0.18, 0.17, '#c4e2fa'],
+  [1030, '#ffe6c8', '#ffb070', 0.18, 0.42, 0.22, '#ffc890'],
+  [1095, '#ffd2b0', '#ff8a58', 0.24, 0.48, 0.21, '#ff9a5c'],
+  [1140, '#f0b4b4', '#ff7a5c', 0.18, 0.36, 0.2, '#ff8a70'],
+  [1185, '#8270b0', '#d06890', 0.10, 0.10, 0.16, '#8a62a8'],
+  [1230, '#46509a', '#000000', 0, 0, 0.12, '#2c3a82'],
+  [1290, '#2f3a7a', '#000000', 0, 0, 0.10, '#1c2a66'],
+  [1600, '#2f3a7a', '#000000', 0, 0, 0.10, '#1c2a66']
+];
+function skyState(min, season) {
+  let m = min;
+  if (m >= 900) m -= season === 1 ? 40 : season === 3 ? -50 : season === 2 ? -15 : 0;
+  m = clamp(m, 0, 1599);
+  for (let i = 0; i < SKYK.length - 1; i++) {
+    const a = SKYK[i], b = SKYK[i + 1];
+    if (m >= a[0] && m < b[0]) { const t = (m - a[0]) / (b[0] - a[0]), e = t * t * (3 - 2 * t); return { amb: mix(a[1], b[1], e), glow: mix(a[2], b[2], e), ga: lerp(a[3], b[3], e), warm: lerp(a[4], b[4], e), sat: lerp(a[5], b[5], e), sky: mix(a[6], b[6], e), m }; }
+  }
+  const a = SKYK[0]; return { amb: a[1], glow: '#000000', ga: 0, warm: 0, sat: a[5], sky: a[6], m };
+}
+/* where the sun is: -1 low in the east (morning) .. +1 low in the west (evening); 0 at noon; null at night */
+function sunSide(st) { const m = st.m; if (m < 330 || m > 1190) return null; return clamp((m - 760) / 430, -1, 1); }
+
+/* ---- cast shadows: every sprite throws a soft, sheared silhouette that follows the sun ---- */
+const _sil = new WeakMap();
+function silhouette(img) {
+  let c = _sil.get(img); if (c) return c;
+  c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const x = c.getContext('2d');
+  // darkest where it touches the ground, thinning out toward the far end like real shade
+  const g = x.createLinearGradient(0, 0, 0, c.height); g.addColorStop(0, 'rgba(42,24,56,0.5)'); g.addColorStop(0.55, 'rgba(42,24,56,0.85)'); g.addColorStop(1, 'rgba(42,24,56,1)');
+  x.drawImage(img, 0, 0); x.globalCompositeOperation = 'source-in'; x.fillStyle = g; x.fillRect(0, 0, c.width, c.height);
+  _sil.set(img, c); return c;
+}
+let SHADOW = { k: 0.4, sy: 0.42, a: 0.3, on: true };
+/* shadows go into a mask, so the grade can light shade with cool sky-light and the rest with warm sun */
+const SHM = mk(4, 4), SHT = mk(4, 4), CAN_BLUR = (() => { try { if (matchMedia('(pointer: coarse)').matches) return false; const c = mk(2, 2); c.x.filter = 'blur(1px)'; return c.x.filter === 'blur(1px)'; } catch (e) { return false; } })();
+function shadowSetup(m) {
+  if (SHM.width !== W || SHM.height !== H) { SHM.width = SHT.width = W; SHM.height = SHT.height = H; }
+  SHM.x.setTransform(1, 0, 0, 1, 0, 0); SHM.x.globalCompositeOperation = 'source-over'; SHM.x.clearRect(0, 0, W, H); SHADOW.used = false;
+  RIM = { a: 0, dir: -1 };
+  if (m.interior) { SHADOW = { on: false }; return; }
+  const st = skyState(S.min, S.season), side = sunSide(st), wet = S.weather === 'rain' || S.weather === 'storm';
+  if (side != null && S.weather === 'sun' && st.ga > 0.08) RIM = { a: Math.min(0.75, (st.ga - 0.08) * 4.5), dir: side > 0 ? -1 : 1 };
+  if (side == null || wet) { SHADOW = { on: false }; return; }
+  const low = Math.abs(side);                       // long shadows when the sun is low
+  const fade = clamp(Math.min(st.m - 330, 1190 - st.m) / 60, 0, 1);
+  SHADOW = { on: true, k: 1.1 + side * 1.05, sy: 0.34 + low * 0.14, a: (S.weather === 'cloud' ? 0.3 : S.weather === 'snow' ? 0.15 : 0.62) * fade * (1 + low * 0.3) };
+}
+/* golden-hour rim light: the edge of each sprite facing the low sun glows warm, as on the title screen */
+let RIM = { a: 0, dir: -1 };
+const _rim = new WeakMap();
+function rimSprite(img, dir) {
+  let m = _rim.get(img); if (!m) _rim.set(img, m = {}); if (m[dir]) return m[dir];
+  const w = img.width, h = img.height, c = document.createElement('canvas'); c.width = w; c.height = h;
+  const sx = img.getContext ? img.getContext('2d') : null; if (!sx) return m[dir] = c;
+  const s = sx.getImageData(0, 0, w, h).data, x = c.getContext('2d'), o = x.createImageData(w, h), d = o.data;
+  const A = (i, j) => (i < 0 || j < 0 || i >= w || j >= h) ? 0 : s[(j * w + i) * 4 + 3];
+  for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+    if (A(i, j) < 128) continue;
+    const k = (j * w + i) * 4, lum = s[k] + s[k + 1] + s[k + 2];
+    if (lum < 90) {                                     // the outline itself turns warm where the light hits it
+      if (A(i + dir, j) < 128 || A(i, j - 1) < 128) { d[k] = 255; d[k + 1] = 196; d[k + 2] = 120; d[k + 3] = 150; }
+      continue;
+    }
+    const edge = A(i + dir, j) < 128 || A(i + dir * 2, j) < 128 && A(i + dir, j) < 160, topE = A(i, j - 1) < 128 || A(i, j - 2) < 128;
+    if (edge || topE) { d[k] = 255; d[k + 1] = 214; d[k + 2] = 140; d[k + 3] = edge && topE ? 255 : 200; }
+  }
+  x.putImageData(o, 0, 0); return m[dir] = c;
+}
+function drawRim(img, x, y) { if (RIM.a <= 0.02) return; ctx.globalAlpha = RIM.a; ctx.drawImage(rimSprite(img, RIM.dir), x, y); ctx.globalAlpha = 1; }
+/* objects never shade themselves: punch their own shapes back out of the mask */
+function shadowOccluder(img, x, y) { if (!SHADOW.on) return; const s = SHM.x; s.globalCompositeOperation = 'destination-out'; s.drawImage(img, x, y); s.globalCompositeOperation = 'source-over'; }
+/* img drawn at (x,y) on screen; its feet rest on screen row baseY. Into the mask by default; 'direct' paints a soft dark copy now */
+function castShadow(img, x, y, baseY, scale = 1, direct = false) {
+  if (!SHADOW.on || SHADOW.a <= 0.01) return;
+  const h = baseY - y, k = SHADOW.k * scale, sy = SHADOW.sy, c = direct ? ctx : SHM.x;
+  c.save(); c.globalAlpha = direct ? Math.min(0.32, SHADOW.a * 0.45) : 1;
+  // local (u,v) inside img -> screen: v measured from the base, leaning away from the sun and squashed onto the ground
+  c.setTransform(1, 0, -k * sy, sy, x + k * sy * h, baseY - h * sy);
+  c.drawImage(silhouette(img), 0, 0);
+  c.restore(); if (!direct) SHADOW.used = true;
+}
+// soft round glow (no dithering): colour at the centre fading smoothly to nothing
+const _glow = {};
+function glowSprite(r, col) {
+  r = Math.max(2, Math.round(r)); const k = r + col; if (_glow[k]) return _glow[k];
+  const c = document.createElement('canvas'); c.width = c.height = r * 2; const x = c.getContext('2d');
+  const q = hx(col), g = x.createRadialGradient(r, r, 0, r, r, r);
+  g.addColorStop(0, `rgba(${q[0]},${q[1]},${q[2]},1)`); g.addColorStop(0.35, `rgba(${q[0]},${q[1]},${q[2]},0.62)`);
+  g.addColorStop(0.7, `rgba(${q[0]},${q[1]},${q[2]},0.2)`); g.addColorStop(1, `rgba(${q[0]},${q[1]},${q[2]},0)`);
+  x.fillStyle = g; x.fillRect(0, 0, r * 2, r * 2);
+  return _glow[k] = c;
+}
+const _vig = {};
+function vignette(w, h) {
+  const k = w + 'x' + h; if (_vig[k]) return _vig[k];
+  const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d');
+  const g = x.createRadialGradient(w / 2, h * 0.46, Math.min(w, h) * 0.32, w / 2, h / 2, Math.hypot(w, h) * 0.62);
+  g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(1, 'rgba(150,128,168,1)');
+  x.fillStyle = g; x.fillRect(0, 0, w, h); return _vig[k] = c;
+}
+// lamps and fires breathe a little
+function flicker(L) { if (L.fl == null) return 1; const t = G.t, s = L.fl; return 0.9 + Math.sin(t * 11 + s) * 0.04 + Math.sin(t * 6.3 + s * 2.1) * 0.04 + (Math.sin(t * 23 + s * 5) > 0.93 ? -0.06 : 0); }
+function drawLightInto(x, L, cx, cy, a) {
+  const r = L.r, i = a * (L.i ?? 1) * flicker(L);
+  if (i <= 0.01) return;
+  x.globalAlpha = Math.min(1, i);
+  const img = glowSprite(Math.min(64, r), L.c || '#ffd48c');
+  if (L.pool) x.drawImage(img, Math.round(L.x - cx - r * 1.35), Math.round(L.y - cy - r * 0.62), Math.round(r * 2.7), Math.round(r * 1.24));
+  else x.drawImage(img, Math.round(L.x - cx - r), Math.round(L.y - cy - r), r * 2, r * 2);
+}
+/* open water mirrors the sky: drawn right after the water tiles, before the ground covers the land */
+function drawSkyOnWater(m, cx, cy, tx0, ty0, tx1, ty1) {
+  const st = skyState(S.min, S.season), wet = S.weather === 'rain' || S.weather === 'storm', grey = S.weather !== 'sun' && S.weather !== 'snow';
+  const side = sunSide(st), gold = st.ga > 0.08 && !grey, ev = side != null && side > 0;
+  const sky = grey ? mix(st.sky, '#8a94a8', wet ? 0.6 : 0.4) : st.sky, q = hx(gold ? mix(sky, '#ffb060', 0.45) : sky);
+  if (gold) {
+    // deep blue water under a low sun, with the sun's broken golden path running toward it
+    const ga = Math.min(1, st.ga * 4);
+    ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = '#4e5cb0'; ctx.globalAlpha = 0.75 * ga; ctx.fillRect(0, 0, W, H);
+    const gq = hx(mix(st.glow, '#ffc060', 0.6)), sx = ev ? -W * 0.15 : W * 1.15, sg = ctx.createRadialGradient(sx, H * 0.5, 10, sx, H * 0.5, W * 0.9);
+    sg.addColorStop(0, `rgba(${gq[0]},${gq[1]},${gq[2]},${0.55 * ga})`); sg.addColorStop(0.6, `rgba(${gq[0]},${gq[1]},${gq[2]},${0.16 * ga})`); sg.addColorStop(1, `rgba(${gq[0]},${gq[1]},${gq[2]},0)`);
+    ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = 1; ctx.fillStyle = sg; ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'lighter';
+    const band = H * 0.2, mid = H * 0.5, tq = Math.floor(G.t * 2.5), path = '#ffd27a';
+    ctx.fillStyle = path;
+    for (let y = Math.round(mid - band); y < mid + band; y += 2) {
+      const vy = 1 - Math.abs(y - mid) / band, row = y + Math.round(cy / 2) * 2;
+      let x = 0;
+      while (x < W) {
+        const r = h2(row, Math.floor(x / 7) + tq * 13, 141), len = 2 + Math.floor(r * 7), gap = 2 + Math.floor(h2(row, x, 142) * 9);
+        const d = ev ? x / W : 1 - x / W, a = vy * vy * (1 - d * 0.85) * ga;
+        if (r > 0.35 && a > 0.04) { ctx.globalAlpha = Math.min(0.9, a * (0.5 + r * 0.6)); ctx.fillRect(x, y, len, 1); }
+        x += len + gap;
+      }
+    }
+    ctx.globalAlpha = 1;  } else {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, `rgba(${q[0]},${q[1]},${q[2]},0.5)`); g.addColorStop(1, `rgba(${q[0]},${q[1]},${q[2]},0.2)`);
+    ctx.globalCompositeOperation = side == null ? 'source-over' : 'soft-light'; ctx.globalAlpha = side == null ? 0.5 : 1; ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
+  }
+  ctx.globalCompositeOperation = 'source-over';
+  if (wet) return;
+  // glints that dance on the ripples (warm in low sun, moonlit silver at night)
+  const night = side == null, t = G.t;
+  ctx.fillStyle = night ? 'rgba(220,230,255,0.55)' : gold ? 'rgba(255,236,170,0.95)' : 'rgba(255,255,255,0.75)';
+  for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
+    if (!WATERY(m.T(tx, ty)) || m.T(tx, ty) === TER.FALL) continue;
+    for (let i = 0; i < (gold ? 3 : 2); i++) {
+      const r = h2(tx * 3 + i, ty * 5 - i, 131), ph = (t * (0.6 + r * 0.7) + r * 9) % 3;
+      if (ph > 0.55) continue;
+      const x = tx * 16 - cx + Math.floor(h2(tx, ty + i * 7, 132) * 14), y = ty * 16 - cy + Math.floor(h2(tx + i * 5, ty, 133) * 15);
+      ctx.fillRect(x, y, ph < 0.18 || ph > 0.4 ? 1 : 2, 1); if (ph > 0.2 && ph < 0.36 && gold) ctx.fillRect(x + 3, y, 1, 1);
+    }
+  }
+}
+/* the whole grade: ambient + lights, saturation, warm soft-light, low sun haze, bloom, vignette */
+function drawAtmosphere(m, dark, cx, cy) {
+  const inside = !!m.interior, st = inside ? null : skyState(S.min, S.season);
+  const night = !inside ? dark : (hourOf(S.min) >= 19 || hourOf(S.min) < 6 ? 0.55 : 0);
+  const wet = S.weather === 'rain' || S.weather === 'storm', dim = S.weather === 'storm' ? 0.5 : wet ? 0.65 : S.weather === 'cloud' ? 0.78 : S.weather === 'snow' ? 0.45 : 1;
+  const winter = S.season === 3 && !inside;
+  let amb = inside ? (night ? '#b89aa6' : '#fff4e6') : mulCol(st.amb, WTINT[S.weather] || '#ffffff');
+  if (!inside && S.weather === 'snow') amb = mix(amb, '#e4eaf6', 0.6 * (1 - dark));   // falling snow: soft, cool, even light
+  if (LC.width !== W || LC.height !== H) { LC.width = W; LC.height = H; }
+  const lx = LC.x;
+  lx.globalCompositeOperation = 'source-over'; lx.globalAlpha = 1; lx.fillStyle = amb; lx.fillRect(0, 0, W, H);
+  // shade: lit only by the cool sky, never by the sun - violet-blue against the warm light
+  if (!inside && SHADOW.on && SHADOW.used) {
+    const sc = mix(mulCol(amb, '#7c7ac4'), '#4a4c9a', 0.25 * st.ga * 3), t = SHT.x;
+    t.globalCompositeOperation = 'copy'; if (CAN_BLUR) t.filter = 'blur(0.35px)'; t.drawImage(SHM, 0, 0); if (CAN_BLUR) t.filter = 'none'; t.globalCompositeOperation = 'source-in'; t.fillStyle = sc; t.fillRect(0, 0, W, H); t.globalCompositeOperation = 'source-over';
+    lx.globalAlpha = Math.min(0.85, SHADOW.a); lx.drawImage(SHT, 0, 0); lx.globalAlpha = 1;
+  }
+  const lightAmt = inside ? (night ? 0.75 : 0.25) : Math.max(dark, G.litEarly ? 0.3 : 0);
+  if (lightAmt > 0.04) { lx.globalCompositeOperation = 'lighter'; for (const L of G.lights) drawLightInto(lx, L, cx, cy, lightAmt * (L.pool ? 0.85 : 1)); lx.globalAlpha = 1; lx.globalCompositeOperation = 'source-over'; }
+  ctx.globalCompositeOperation = 'multiply'; ctx.drawImage(LC, 0, 0);
+  // richer colour: blend toward full saturation (keeps hue and brightness)
+  const sat = inside ? 0.12 : st.sat * (wet ? 0.5 : 1) * (winter ? 0.4 : 1) * (S.weather === 'snow' ? 0.5 : 1);
+  if (sat > 0.01) { ctx.globalCompositeOperation = 'saturation'; ctx.globalAlpha = sat; ctx.fillStyle = '#ff2000'; ctx.fillRect(0, 0, W, H); }
+  // warm, rich grade (soft-light): lifts the sunlit side of everything without flattening it
+  const warm = inside ? 0.16 : st.warm * dim * (winter ? 0.7 : 1);
+  if (warm > 0.01) { ctx.globalCompositeOperation = 'soft-light'; ctx.globalAlpha = warm; ctx.fillStyle = inside ? '#ffbf80' : '#ffa458'; ctx.fillRect(0, 0, W, H); }
+  // depth: a gentle contrast lift (the frame soft-lit by itself) - deeper shade, brighter light
+  const con = inside ? 0.14 : (S.weather === 'snow' ? 0.05 : 0.12 + st.ga * 0.9 + (dark > 0.5 ? 0.08 : 0)) * (wet ? 0.6 : 1);
+  if (con > 0.02) { ctx.globalCompositeOperation = 'soft-light'; ctx.globalAlpha = Math.min(0.5, con); ctx.drawImage(ctx.canvas, 0, 0); }
+  // sunlight slanting in through windows onto the floor
+  if (inside && G.shafts && G.shafts.length) {
+    const sk = (12 - S.min / 60) * 3;
+    ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = 1;
+    for (const s of G.shafts) {
+      const g = ctx.createLinearGradient(0, s.y, 0, s.y + 44); g.addColorStop(0, `rgba(255,226,170,${0.3 * s.a})`); g.addColorStop(1, 'rgba(255,226,170,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s.x + s.w, s.y); ctx.lineTo(s.x + s.w + sk + 6, s.y + 44); ctx.lineTo(s.x + sk - 6, s.y + 44); ctx.closePath(); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+  // low sun haze from the sun's side of the sky (east in the morning, west in the evening)
+  if (!inside && st.ga > 0.01) {
+    const evening = S.min > 720, g = ctx.createLinearGradient(evening ? 0 : W, 0, evening ? W * 0.55 : W * 0.45, H * 0.7);
+    const q = hx(st.glow); g.addColorStop(0, `rgba(${q[0]},${q[1]},${q[2]},${st.ga * dim})`); g.addColorStop(1, `rgba(${q[0]},${q[1]},${q[2]},0)`);
+    ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = 1; ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  }
+  // bloom: light sources glow over what they light
+  const bloom = inside ? lightAmt * 0.5 : lightAmt;
+  if (bloom > 0.25) {
+    ctx.globalCompositeOperation = 'lighter';
+    for (const L of G.lights) {
+      if (L.r < 10 && !L.pool) { ctx.globalAlpha = 0.9 * (L.i ?? 1); ctx.fillStyle = L.c || '#e8ff90'; ctx.fillRect(Math.round(L.x - cx), Math.round(L.y - cy), 1, 1); continue; }
+      if (L.pool || L.nb) continue;
+      ctx.globalAlpha = 0.22 * bloom * flicker(L);
+      const r = Math.round(L.r * 0.5); ctx.drawImage(glowSprite(r, '#ffb862'), Math.round(L.x - cx - r), Math.round(L.y - cy - r));
+    }
+  }
+  // soft vignette to pull the eye to the middle
+  ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha = inside ? 0.45 : Math.min(0.95, 0.36 + st.ga * 2.2 + dark * 0.3); ctx.drawImage(vignette(W, H), 0, 0);
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+}
 
 // ---- 14_ui.js ----
 /* ---------- UI windows ---------- */
